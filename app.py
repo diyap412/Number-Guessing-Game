@@ -1,36 +1,27 @@
-# app.py
-
 from flask import Flask, render_template, request
-import number_guessing  # Import the game logic from number_guessing.py
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    # Start a new game if it's the first time visiting the page
-    if 'target' not in request.cookies:
-        target = number_guessing.generate_number()  # Call the function from number_guessing.py
-        response = render_template('number_guessing.html', message="Guess the number between 1 and 100", guess=None)
-        response.set_cookie('target', str(target))  # Set the target number in cookies
-        return response
+import random
+secret_number = random.randint(1, 100)
 
-    target = int(request.cookies.get('target'))
+@app.route("/", methods=["GET", "POST"])
+def index():
     message = ""
     guess = None
-
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            guess = int(request.form['guess'])  # Get the guess from the form
-            if guess < target:
+            guess = int(request.form["guess"])
+            if guess < secret_number:
                 message = "Too low! Try again."
-            elif guess > target:
+            elif guess > secret_number:
                 message = "Too high! Try again."
             else:
-                message = "Congratulations! You guessed it right."
+                message = "Congratulations! You guessed the number."
         except ValueError:
-            message = "Please enter a valid number."  # Handle invalid input
+            message = "Please enter a valid number."
+    
+    return render_template("index.html", message=message, guess=guess)
 
-    return render_template('number_guessing.html', message=message, guess=guess)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
